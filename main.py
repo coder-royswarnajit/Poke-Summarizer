@@ -37,17 +37,6 @@ except Exception as e:
     st.warning(f"Failed to initialize Monad blockchain client: {e}")
     monad_client = None
 
-def add_copy_button(text, button_label="Copy to clipboard"):
-    """Add a button that copies text to clipboard when clicked"""
-    import json
-    # Generate a unique key for this button
-    key = f"copy_button_{hash(text)}"
-    
-    if st.button(button_label, key=key):
-        # Use expandable container with st.code for easier copying
-        with st.expander("Copy this text", expanded=True):
-            st.code(text)
-            st.success("Text ready to copy! Use the copy button in the top-right corner of the code block.")
 
 def main():
     # Always render the authentication UI in the sidebar
@@ -147,13 +136,10 @@ def main():
                 # Display the summary and sentiment
                 st.subheader("Summary")
                 st.info(summary)
-                # Add copy button for summary
-                add_copy_button(summary, "Copy Summary")
 
                 st.subheader("Sentiment Analysis")
                 st.info(sentiment)
-                # Add copy button for sentiment
-                add_copy_button(sentiment, "Copy Sentiment Analysis")
+
                 
                 # Create PDF download link with the improved function
                 with st.spinner("Generating PDF..."):
@@ -220,7 +206,6 @@ def main():
         - Extract action items and deadlines
         - Analyze sentiment and key discussion points
         - Download summaries as PDF
-        - Copy results to clipboard with one click
         - Translate summaries to 20+ languages
         - See news related to your meeting topics
         
