@@ -6,14 +6,14 @@ from user_auth import render_auth_ui, render_user_profile
 from datetime import datetime
 from external_apis import get_groq_client, MonadBlockchainClient, KafkaStreamer
 from processing import extract_text_from_file, preprocess_audio
+from pdf_utils import create_summary_pdf, get_pdf_download_link
 from transcription_and_summarization import (
     transcribe_with_transformers_whisper,
     translate_to_english,
+    translate_to_language,
     detect_language,
     improve_transcript_quality,
     summarize_text_groq,
-    extract_action_items,
-    extract_deadlines,
     analyze_sentiment,
 )  # Import all functions
 
@@ -24,6 +24,10 @@ if 'whisper_model_size' not in st.session_state:
 # Initialize session state for chunk size if not already set
 if 'chunk_size' not in st.session_state:
     st.session_state.chunk_size = 30
+
+# Initialize session state for summary language
+if 'summary_language' not in st.session_state:
+    st.session_state.summary_language = "English"
 
 # Initialize Groq client (moved here)
 if not st.session_state.get('offline_mode', False):
@@ -44,6 +48,25 @@ try:
 except Exception as e:
     st.warning(f"Failed to initialize Kafka streamer: {e}")
     kafka_streamer = None
+
+def add_copy_button(text, button_label="Copy to clipboard"):
+    """Add a button that copies text to clipboard when clicked"""
+    # Generate a unique key for this button
+    key = f"copy_button_{hash(text)}"
+    if st.button(button_label, key=key):
+        try:
+            # Using JavaScript to copy text to clipboard
+            js_code = f"""
+            <script>
+                navigator.clipboard.writeText({text});
+                // Show a tooltip or some indication it was copied
+                alert('Copied to clipboard!');
+            </script>
+            """
+            st.components.v1.html(js_code, height=0)
+            st.success("Copied to clipboard!")
+        except Exception as e:
+            st.error(f"Failed to copy: {e}")
 
 def main():
     # Always render the authentication UI in the sidebar
@@ -72,6 +95,13 @@ def main():
                 value=30
             )
             st.session_state.offline_mode = st.checkbox("Offline Mode")
+            
+            # Add language selection
+            st.session_state.summary_language = st.selectbox(
+                "Summary Language",
+                list(LANGUAGES.keys()),
+                index=0  # Default to English
+            )
 
         # Main content area
         uploaded_file = st.file_uploader("Upload meeting notes, audio, or video", type=["txt", "pdf", "docx", "mp3", "wav", "mp4", "avi", "mov"])
@@ -125,36 +155,48 @@ def main():
                 # Summarization and Analysis
                 with st.spinner("Summarizing with AI..."):
                     if not st.session_state.get('offline_mode', False) and client:
-                        summary = summarize_text_groq(text_to_summarize, client)
-                        action_items = extract_action_items(text_to_summarize, client)
-                        deadlines = extract_deadlines(text_to_summarize, client)
-                        sentiment = analyze_sentiment(text_to_summarize, client)
+                        # Generate summary in English first
+                        summary_english = summarize_text_groq(text_to_summarize, client)
+                        sentiment_english = analyze_sentiment(text_to_summarize, client)
+                        
+                        # Translate to target language if not English
+                        target_lang = st.session_state.summary_language
+                        if target_lang != "English":
+                            summary = translate_to_language(summary_english, target_lang, client)
+                            sentiment = translate_to_language(sentiment_english, target_lang, client)
+                            
+                        else:
+                            summary = summary_english
+                            sentiment = sentiment_english
                     else:
                         summary = "Summary unavailable in offline mode."
-                        action_items = "Action items unavailable in offline mode."
-                        deadlines = "Deadlines unavailable in offline mode."
                         sentiment = "Sentiment analysis unavailable in offline mode."
 
                 st.subheader("Summary")
                 st.info(summary)
+                # Add copy button for summary
+                add_copy_button(summary, "Copy Summary")
 
-                st.subheader("Action Items")
-                st.info(action_items)
-
-                st.subheader("Deadlines")
-                st.info(deadlines)
 
                 st.subheader("Sentiment Analysis")
                 st.info(sentiment)
+                # Add copy button for sentiment
+                add_copy_button(sentiment, "Copy Sentiment Analysis")
+                
+                # Create PDF download link
+                with st.spinner("Generating PDF..."):
+                    pdf_path = create_summary_pdf(summary,sentiment)
+                    pdf_link = get_pdf_download_link(pdf_path)
+                    st.markdown(pdf_link, unsafe_allow_html=True)
 
                 # Streaming (Kafka) - Example with error handling
                 if not st.session_state.get('offline_mode', False) and kafka_streamer:
                     try:
                         kafka_data = {
                             "summary": summary,
-                            "action_items": action_items,
                             "sentiment": sentiment,
                             "timestamp": datetime.now().isoformat(),
+                            "language": st.session_state.summary_language
                         }
                         if kafka_streamer.connect():
                             kafka_streamer.stream_data(kafka_data)
@@ -170,6 +212,9 @@ def main():
         - Generate concise summaries of meeting content
         - Extract action items and deadlines
         - Analyze sentiment and key discussion points
+        - Download summaries as PDF
+        - Copy results to clipboard with one click
+        - Translate summaries to 20+ languages
         
         Sign in with the demo account or create your own to get started!
         """)

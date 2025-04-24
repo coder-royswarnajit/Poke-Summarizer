@@ -174,82 +174,6 @@ def summarize_text_groq(transcript, client, target_language="English"):
         st.error(f"Error summarizing text: {e}")
         return "Summary failed to generate."
 
-def extract_action_items(transcript, client, target_language="English"):
-    """Use Groq API to extract action items, responsible persons, and deadlines."""
-    if not transcript or len(transcript.strip()) < 50:
-        return []
-    
-    if client is None:
-        return "Action items unavailable in offline mode."
-
-    prompt = f"""
-    You are an AI that extracts structured action items from meeting transcripts.
-    Identify action items, responsible persons, and deadlines where available.
-
-    IMPORTANT: Translate the action descriptions into {target_language} language.
-
-    Return the output as a JSON list with these keys: 'person', 'action', and 'deadline'.
-    Keep person names in their original form.
-
-    Ensure the deadline is extracted accurately. If no deadline is mentioned, use "Not specified".
-
-    FORMAT YOUR RESPONSE AS VALID JSON ARRAY ONLY. No explanations before or after the JSON.
-
-    Transcript:
-    {transcript}
-    """
-    try:
-        response = client.chat.completions.create(
-            model="llama3-70b-8192",
-            messages=[{"role": "user", "content": prompt}],
-            temperature=0.3,
-            response_format={"type": "json_object"}  # Request JSON format
-        )
-        return json.loads(response.choices[0].message.content.strip())
-    except json.JSONDecodeError as e:
-        st.error(f"Error parsing JSON response: {e}")
-        return []
-    except Exception as e:
-        st.error(f"Error extracting action items: {e}")
-        return []
-
-def extract_deadlines(transcript, client):
-    """Use Groq API to extract deadlines from the transcript."""
-    if not transcript or len(transcript.strip()) < 50:
-        return []
-    
-    if client is None:
-        return "Deadlines unavailable in offline mode."
-
-    prompt = f"""
-    Extract all deadlines mentioned in the following meeting transcript.
-    Return them as a JSON list of strings in 'YYYY-MM-DD' format.
-    If no deadlines are found, return an empty list.
-
-    Transcript:
-    {transcript}
-    """
-    try:
-        response = client.chat.completions.create(
-            model="llama3-70b-8192",
-            messages=[{"role": "user", "content": prompt}],
-            temperature=0.2,
-            response_format={"type": "json_object"}
-        )
-        deadlines = json.loads(response.choices[0].message.content.strip())
-        # Parse dates using dateparser
-        parsed_deadlines = []
-        for deadline in deadlines:
-            parsed_date = dateparser.parse(deadline)
-            if parsed_date:
-                parsed_deadlines.append(parsed_date.strftime("%Y-%m-%d"))
-        return parsed_deadlines
-    except json.JSONDecodeError as e:
-        st.error(f"Error parsing JSON response: {e}")
-        return []
-    except Exception as e:
-        st.error(f"Error extracting deadlines: {e}")
-        return []
 
 def analyze_sentiment(transcript, client):
     """Use Groq API to analyze the sentiment of the transcript."""
@@ -276,3 +200,29 @@ def analyze_sentiment(transcript, client):
     except Exception as e:
         st.error(f"Error analyzing sentiment: {e}")
         return "Sentiment analysis failed."
+    
+def translate_to_language(text, target_language="English", client=None):
+    """Use Groq API to translate text to the specified language."""
+    if not text or len(text.strip()) < 10 or target_language.lower() == "english":
+        return text
+
+    prompt = f"""
+    Translate the following text to {target_language}.
+    Only provide the translation without any explanations or comments.
+
+    Text to translate:
+    {text}
+    """
+    try:
+        if client is None:
+            return text  # Return original text if client is unavailable
+            
+        response = client.chat.completions.create(
+            model="llama3-70b-8192",
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.1
+        )
+        return response.choices[0].message.content.strip()
+    except Exception as e:
+        st.error(f"Error translating text: {e}")
+        return text  # Return original text if translation fails

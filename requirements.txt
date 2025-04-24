@@ -2,7 +2,7 @@ streamlit
 python-dotenv
 groq
 PyPDF2
-docx2txt
+python-docx
 moviepy
 transformers
 torch
