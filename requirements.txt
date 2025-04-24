@@ -1,0 +1,14 @@
+streamlit
+python-dotenv
+groq
+PyPDF2
+docx2txt
+moviepy
+transformers
+torch
+librosa
+soundfile
+kafka-python
+requests
+fpdf
+dateparser
