@@ -11,6 +11,9 @@ class BaseSDK:
 
     def sign_up(self, username, password):
         """Register a new user"""
+        if 'users' not in st.session_state:
+            st.session_state.users = {}
+        
         if username in st.session_state.users:
             return False, "Username already exists"
         hashed_password = hashlib.sha256(password.encode()).hexdigest()
@@ -23,6 +26,9 @@ class BaseSDK:
 
     def sign_in(self, username, password):
         """Authenticate user with username and password"""
+        if 'users' not in st.session_state:
+            st.session_state.users = {}
+            
         if username not in st.session_state.users:
             return False, "User not found"
         hashed_password = hashlib.sha256(password.encode()).hexdigest()
@@ -50,8 +56,12 @@ def render_auth_ui():
     with st.sidebar:
         st.subheader("👤 Authentication")
         
+        # Initialize users dictionary if it doesn't exist
+        if 'users' not in st.session_state:
+            st.session_state.users = {}
+        
         # Initialize demo account if it doesn't exist
-        if 'users' in st.session_state and 'demo' not in st.session_state.users:
+        if 'demo' not in st.session_state.users:
             import hashlib
             st.session_state.users['demo'] = {
                 "password": hashlib.sha256("password".encode()).hexdigest(),
@@ -62,7 +72,7 @@ def render_auth_ui():
         # Only show auth tabs if not authenticated
         if not st.session_state.get('user_authenticated', False):
             auth_tab = st.radio("", ["Sign In", "Sign Up"], horizontal=True)
-
+            
             if auth_tab == "Sign In":
                 with st.form("login_form"):
                     username = st.text_input("Username")

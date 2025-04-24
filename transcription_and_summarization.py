@@ -14,7 +14,7 @@ if 'whisper_model_size' not in st.session_state:
 # Initialize Groq client (moved here)
 client = get_groq_client()
 
-def transcribe_with_transformers_whisper(audio_path, whisper_model_size=None, chunk_size=30):
+def transcribe_with_transformers_whisper(audio_path, whisper_model_size=None):
     """Transcribe audio using Transformers Whisper model."""
     try:
         import torch
@@ -28,7 +28,8 @@ def transcribe_with_transformers_whisper(audio_path, whisper_model_size=None, ch
             device = "cuda" if torch.cuda.is_available() else "cpu"
             model_name = f"openai/whisper-{whisper_model_size}"
             transcriber = pipeline("automatic-speech-recognition", model=model_name, device=device)
-            result = transcriber(audio_path, return_timestamps=True, chunk_length_s=chunk_size)
+            # Using default chunk size as determined by the model
+            result = transcriber(audio_path, return_timestamps=True)
             return result["text"]
     except ImportError:
         st.error("Required packages not installed. Please install torch and transformers.")
@@ -152,7 +153,7 @@ def summarize_text_groq(transcript, client, target_language="English"):
         return "The transcript is too short to summarize."
     
     if client is None:
-        return "Summary unavailable in offline mode."
+        return "Summary unavailable. API client not initialized."
 
     prompt = f"""
     Summarize the following meeting transcript in a concise and informative way.
@@ -181,7 +182,7 @@ def analyze_sentiment(transcript, client):
         return "The transcript is too short to analyze sentiment."
     
     if client is None:
-        return "Sentiment analysis unavailable in offline mode."
+        return "Sentiment analysis unavailable. API client not initialized."
 
     prompt = f"""
     Analyze the overall sentiment of the following meeting transcript.
