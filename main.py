@@ -59,12 +59,17 @@ def main():
                 index=1  # Default to "base"
             )
             
-            # Add language selection
-            st.session_state.summary_language = st.selectbox(
-                "Summary Language",
-                list(LANGUAGES.keys()),
-                index=0  # Default to English
-            )
+            # Add language selection only for Pro users
+            if st.session_state.is_pro:
+                st.session_state.summary_language = st.selectbox(
+                    "Summary Language",
+                    list(LANGUAGES.keys()),
+                    index=0  # Default to English
+                )
+            else:
+                st.info("📌 Upgrade to Pro for multi-language summaries")
+                # Default to English for non-Pro users
+                st.session_state.summary_language = "English"
         
         # Main content area (full width)
         uploaded_file = st.file_uploader("Upload meeting notes, audio, or video", type=["txt", "pdf", "docx", "mp3", "wav", "mp4", "avi", "mov"])
@@ -96,7 +101,8 @@ def main():
             if text_to_summarize:
                 content_hash = hashlib.sha256(text_to_summarize.encode()).hexdigest()
 
-                if monad_client:
+                # Blockchain verification only for Pro users
+                if monad_client and st.session_state.is_pro:
                     try:
                         # Track data provenance using Monad blockchain
                         monad_success, tx_hash = monad_client.track_data_provenance(
@@ -113,6 +119,9 @@ def main():
                             st.info(f"Credibility verification sources: {sources}")
                     except Exception as e:
                         st.error(f"Error with Monad blockchain services: {e}")
+                elif not st.session_state.is_pro:
+                    # Show upgrade banner for credibility scoring
+                    st.info("📌 Upgrade to Pro for content credibility verification")
 
                 # Summarization and Analysis
                 with st.spinner("Summarizing with AI..."):
@@ -121,9 +130,9 @@ def main():
                         summary_english = summarize_text_groq(text_to_summarize, client)
                         sentiment_english = analyze_sentiment(text_to_summarize, client)
                         
-                        # Translate to target language if not English
+                        # Translate to target language if Pro user and not English
                         target_lang = st.session_state.summary_language
-                        if target_lang != "English":
+                        if target_lang != "English" and st.session_state.is_pro:
                             summary = translate_to_language(summary_english, target_lang, client)
                             sentiment = translate_to_language(sentiment_english, target_lang, client)
                         else:
@@ -140,32 +149,36 @@ def main():
                 st.subheader("Sentiment Analysis")
                 st.info(sentiment)
 
-                
-                # Create PDF download link with the improved function
-                with st.spinner("Generating PDF..."):
-                    pdf_path = create_summary_pdf(summary, sentiment)
-                    
-                    # Use Streamlit's native download button instead of HTML link
-                    with open(pdf_path, "rb") as pdf_file:
-                        pdf_bytes = pdf_file.read()
-                    
-                    st.download_button(
-                        label="📄 Download Summary as PDF",
-                        data=pdf_bytes,
-                        file_name="meeting_summary.pdf",
-                        mime="application/pdf",
-                        key="pdf_download"
-                    )
-                    
-                    # Clean up the PDF file after offering download
-                    try:
-                        if 'previous_pdf_path' in st.session_state and st.session_state.previous_pdf_path != pdf_path:
-                            os.unlink(st.session_state.previous_pdf_path)
-                    except Exception as e:
-                        pass  # Silently ignore cleanup errors
-                    
-                    # Store this path for cleanup on next run
-                    st.session_state.previous_pdf_path = pdf_path
+                # PDF download option only for Pro users
+                if st.session_state.is_pro:
+                    # Create PDF download link with the improved function
+                    with st.spinner("Generating PDF..."):
+                        pdf_path = create_summary_pdf(summary, sentiment)
+                        
+                        # Use Streamlit's native download button instead of HTML link
+                        with open(pdf_path, "rb") as pdf_file:
+                            pdf_bytes = pdf_file.read()
+                        
+                        st.download_button(
+                            label="📄 Download Summary as PDF",
+                            data=pdf_bytes,
+                            file_name="meeting_summary.pdf",
+                            mime="application/pdf",
+                            key="pdf_download"
+                        )
+                        
+                        # Clean up the PDF file after offering download
+                        try:
+                            if 'previous_pdf_path' in st.session_state and st.session_state.previous_pdf_path != pdf_path:
+                                os.unlink(st.session_state.previous_pdf_path)
+                        except Exception as e:
+                            pass  # Silently ignore cleanup errors
+                        
+                        # Store this path for cleanup on next run
+                        st.session_state.previous_pdf_path = pdf_path
+                else:
+                    # Show upgrade banner for PDF download
+                    st.info("📌 Upgrade to Pro to download summaries as PDF")
                 
                 # Fetch and display related news AFTER summary is created
                 if news_api_key and client:
@@ -205,9 +218,12 @@ def main():
         - Generate concise summaries of meeting content
         - Extract action items and deadlines
         - Analyze sentiment and key discussion points
+        - See news related to your meeting topics
+        
+        ### Pro Features:
         - Download summaries as PDF
         - Translate summaries to 20+ languages
-        - See news related to your meeting topics
+        - Content credibility verification with blockchain
         
         Sign in with the demo account or create your own to get started!
         """)
@@ -223,7 +239,7 @@ def main():
     st.markdown(
         """
     ---
-    <p style='text-align: center;'>Poke Summarizer © 2025 | AI-powered meeting transcription and summarization tool</p>
+    <p style='text-align: center;'>Poke Summarizer © 2025 | AI-powered News transcription and summarization tool</p>
     """,
         unsafe_allow_html=True,
     )

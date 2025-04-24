@@ -1,4 +1,3 @@
-# user_auth.py
 import streamlit as st
 import hashlib
 from datetime import datetime
@@ -117,7 +116,7 @@ def render_auth_ui():
                                 st.error(message)
 
             st.markdown("---")
-            st.caption("Demo Account: `demo` / `password`")
+            st.caption("Demo Account: demo / password")
 
 def render_user_profile():
     """Render the user profile section"""
@@ -130,6 +129,12 @@ def render_user_profile():
             st.success("Pro Subscription Active ✓")
         else:
             st.warning("Free Tier")
+            st.markdown("""
+            #### Pro Features:
+            - Multiple language summaries
+            - PDF download option
+            - Content credibility scoring
+            """)
             if st.button("Upgrade to Pro"):
                 base_client = BaseSDK(st.session_state.get("BASE_API_KEY")) # Safely access BASE_API_KEY
                 if base_client.upgrade_to_pro(st.session_state.user_id):
