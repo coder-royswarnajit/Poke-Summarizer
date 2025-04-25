@@ -2,7 +2,7 @@
 # Primary accent color for interactive elements
 primaryColor = "#4B6BF5"
 
-# Background color for the main content area
+# Background color for the main content area will be controlled by our custom CSS
 backgroundColor = "#FFFFFF"
 
 # Background color for sidebar and most interactive components
@@ -13,6 +13,9 @@ textColor = "#333333"
 
 # Font family for all text in the app, except code blocks
 font = "sans-serif"
+
+# We won't use base/primaryColor here as we'll control this with our custom CSS
+# These settings will be our light mode defaults
 
 [server]
 # Enable quiet mode to remove Streamlit messages

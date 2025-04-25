@@ -32,16 +32,27 @@ def transcribe_with_transformers_whisper(audio_path, whisper_model_size=None):
             device = "cuda" if torch.cuda.is_available() else "cpu"
             model_name = f"openai/whisper-{whisper_model_size}"
             transcriber = pipeline("automatic-speech-recognition", model=model_name, device=device)
-            # Using default chunk size as determined by the model
+            
+            # Handle different return types based on model version
             result = transcriber(audio_path, return_timestamps=True)
-            return result["text"]
+            
+            # Check if result is a dictionary or string
+            if isinstance(result, dict):
+                return result.get("text", "")
+            elif isinstance(result, str):
+                return result
+            else:
+                # If chunks, join them
+                if isinstance(result, list) and result and "text" in result[0]:
+                    return " ".join(chunk["text"] for chunk in result)
+                return str(result)
     except ImportError:
         st.error("Required packages not installed. Please install torch and transformers.")
         return "Transcription failed: Missing dependencies."
     except Exception as e:
         st.error(f"Transcription error: {str(e)}")
         return f"Transcription failed: {str(e)}"
-
+    
 def preprocess_audio(audio_path):
     """Enhance audio quality before transcription."""
     try:

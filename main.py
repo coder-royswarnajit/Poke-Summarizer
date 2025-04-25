@@ -27,8 +27,13 @@ from custom import (
     render_summary_box,
     render_sentiment_box,
     render_news_card,
-    render_pro_feature_banner
+    render_pro_feature_banner,
+    render_dark_mode_toggle,
 )
+
+# Initialize session state for dark mode if not already set
+if 'dark_mode' not in st.session_state:
+    st.session_state.dark_mode = False
 
 # Initialize session state for whisper model size if not already set
 if 'whisper_model_size' not in st.session_state:
@@ -75,11 +80,17 @@ def render_news_column(articles):
                 st.markdown(render_news_card(article), unsafe_allow_html=True)
 
 def main():
-    # Apply custom CSS
+    # Apply custom CSS based on current theme
     apply_custom_css()
     
     # Always render the authentication UI in the sidebar
     render_auth_ui()
+    
+    # Add dark mode toggle to sidebar (at the top, before other content)
+    with st.sidebar:
+        st.markdown("### Theme")
+        render_dark_mode_toggle()
+        st.markdown("---")
     
     # Render logo in main area
     render_logo()
@@ -91,7 +102,7 @@ def main():
     if st.session_state.user_authenticated:
         # Render user profile in sidebar
         render_user_profile()
-
+    
         # Add settings in sidebar
         with st.sidebar:
             st.subheader("Settings")
@@ -139,25 +150,37 @@ def main():
                 3. Get your summary and sentiment analysis
                 4. See related news and insights
                 """)
-
         if uploaded_file:
             file_path_or_text = extract_text_from_file(uploaded_file)
 
             if uploaded_file.type.startswith("audio/") or uploaded_file.type.startswith("video/"):
                 if file_path_or_text:  # Only proceed if audio extraction was successful
-                    enhanced_audio_path = preprocess_audio(file_path_or_text)
-                    transcript = transcribe_with_transformers_whisper(
-                        enhanced_audio_path,
-                        st.session_state.whisper_model_size,
-                    )
-                    text_to_summarize = translate_to_english(transcript)
-
-                    try:
-                        os.unlink(file_path_or_text)  # Clean up original audio
-                        if enhanced_audio_path != file_path_or_text:
-                            os.unlink(enhanced_audio_path)  # Clean up enhanced audio
-                    except Exception as e:
-                        st.warning(f"Error cleaning up temporary files: {e}")
+                    with st.spinner("Processing audio..."):
+                        # First preprocess the audio
+                        enhanced_audio_path = preprocess_audio(file_path_or_text)
+                        
+                        # Then transcribe it
+                        transcript = transcribe_with_transformers_whisper(
+                            enhanced_audio_path,
+                            st.session_state.whisper_model_size,
+                        )
+                        
+                        # Improve transcript quality
+                        transcript = improve_transcript_quality(transcript)
+                        
+                        # Set text_to_summarize to the transcript
+                        text_to_summarize = transcript
+                        
+                        # Show the transcript to the user
+                        with st.expander("View Transcript"):
+                            st.write(transcript)
+                        
+                        try:
+                            os.unlink(file_path_or_text)  # Clean up original audio
+                            if enhanced_audio_path != file_path_or_text:
+                                os.unlink(enhanced_audio_path)  # Clean up enhanced audio
+                        except Exception as e:
+                            st.warning(f"Error cleaning up temporary files: {e}")
                 else:
                     st.error("Failed to extract audio from the uploaded file.")
                     return  # Stop processing if audio extraction failed
@@ -299,7 +322,7 @@ def main():
                         latest_news = fetch_latest_news(news_api_key, category="technology")
                         render_news_column(latest_news)
                 
-        # If no file uploaded yet and authenticated, show latest news at the bottom
+       # If no file uploaded yet and authenticated, show latest news at the bottom
         elif st.session_state.user_authenticated:
             st.subheader("📰 Latest News")
             if news_api_key:
@@ -322,6 +345,7 @@ def main():
         - Extract action items and deadlines
         - Analyze sentiment and key discussion points
         - See news related to your meeting topics
+        - Toggle between light and dark mode for comfortable viewing
         
         ### Pro Features:
         - Download summaries as PDF
@@ -331,6 +355,11 @@ def main():
         
         Sign in with the demo account or create your own to get started!
         """)
+
+        # Dark mode toggle still available for unauthenticated users
+        with st.sidebar:
+            st.markdown("### Try Dark Mode")
+            st.markdown("You can toggle dark mode even before signing in!")
         
         # Show generic news when not authenticated
         st.subheader("📰 Latest News")
