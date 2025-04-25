@@ -1,0 +1,23 @@
+[theme]
+# Primary accent color for interactive elements
+primaryColor = "#4B6BF5"
+
+# Background color for the main content area
+backgroundColor = "#FFFFFF"
+
+# Background color for sidebar and most interactive components
+secondaryBackgroundColor = "#F0F2F6"
+
+# Color used for almost all text
+textColor = "#333333"
+
+# Font family for all text in the app, except code blocks
+font = "sans-serif"
+
+[server]
+# Enable quiet mode to remove Streamlit messages
+enableCORS = false
+enableXsrfProtection = true
+
+[browser]
+gatherUsageStats = false

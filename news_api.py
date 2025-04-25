@@ -80,7 +80,8 @@ def fetch_related_news(summary, api_key, max_results=5):
                     "source": article.get('source', {}).get('name', 'Unknown source'),
                     "url": article.get('url', '#'),
                     "publishedAt": article.get('publishedAt', ''),
-                    "description": article.get('description', 'No description available')
+                    "description": article.get('description', 'No description available'),
+                    "urlToImage": article.get('urlToImage')  # Add image URL
                 })
                 
             return formatted_articles
@@ -122,7 +123,8 @@ def fetch_latest_news(api_key, category="general", max_results=5):
                     "source": article.get('source', {}).get('name', 'Unknown source'),
                     "url": article.get('url', '#'),
                     "publishedAt": article.get('publishedAt', ''),
-                    "description": article.get('description', 'No description available')
+                    "description": article.get('description', 'No description available'),
+                    "urlToImage": article.get('urlToImage')  # Add image URL
                 })
                 
             return formatted_articles
@@ -134,7 +136,7 @@ def fetch_latest_news(api_key, category="general", max_results=5):
     except Exception as e:
         st.error(f"Error fetching latest news: {e}")
         return []
-
+    
 def render_news_column(articles):
     """Render news articles in a Streamlit container"""
     if not articles:

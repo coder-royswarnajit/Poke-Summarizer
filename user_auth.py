@@ -134,6 +134,7 @@ def render_user_profile():
             - Multiple language summaries
             - PDF download option
             - Content credibility scoring
+            - Advanced sentiment analysis
             """)
             if st.button("Upgrade to Pro"):
                 base_client = BaseSDK(st.session_state.get("BASE_API_KEY")) # Safely access BASE_API_KEY

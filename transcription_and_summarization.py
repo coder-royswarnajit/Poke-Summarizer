@@ -11,6 +11,10 @@ from config import LANGUAGES  # Import the LANGUAGES dictionary
 if 'whisper_model_size' not in st.session_state:
     st.session_state.whisper_model_size = "base"  # Set a default value
 
+# Initialize sentiment analysis approach if not in session state
+if 'sentiment_analysis_approach' not in st.session_state:
+    st.session_state.sentiment_analysis_approach = "standard"  # Default to standard
+
 # Initialize Groq client (moved here)
 client = get_groq_client()
 
@@ -183,7 +187,22 @@ def analyze_sentiment(transcript, client):
     
     if client is None:
         return "Sentiment analysis unavailable. API client not initialized."
+        
+    # Check which sentiment analysis approach to use
+    sentiment_approach = st.session_state.get("sentiment_analysis_approach", "standard")
+    
+    if sentiment_approach == "standard":
+        return analyze_standard_sentiment(transcript, client)
+    elif sentiment_approach == "detailed":
+        return analyze_detailed_sentiment(transcript, client)
+    elif sentiment_approach == "emotional":
+        return analyze_emotional_sentiment(transcript, client)
+    else:
+        return analyze_standard_sentiment(transcript, client)  # Default fallback
 
+
+def analyze_standard_sentiment(transcript, client):
+    """Standard sentiment analysis providing basic positive/negative/neutral classification."""
     prompt = f"""
     Analyze the overall sentiment of the following meeting transcript.
     Return the sentiment as one of the following: "Positive", "Negative", or "Neutral".
@@ -201,6 +220,60 @@ def analyze_sentiment(transcript, client):
     except Exception as e:
         st.error(f"Error analyzing sentiment: {e}")
         return "Sentiment analysis failed."
+
+
+def analyze_detailed_sentiment(transcript, client):
+    """Advanced sentiment analysis with confidence scores and reasoning."""
+    prompt = f"""
+    Perform an advanced sentiment analysis of the following meeting transcript.
+    Provide:
+    1. Overall sentiment classification (Positive, Negative, or Neutral)
+    2. Confidence score (1-10)
+    3. Brief explanation of key factors influencing the sentiment
+    4. Any shifts in sentiment throughout the meeting
+    5. Most emotionally charged topics or moments
+
+    Format your response as a structured analysis with these sections.
+
+    Transcript:
+    {transcript}
+    """
+    try:
+        response = client.chat.completions.create(
+            model="llama3-70b-8192",
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.3
+        )
+        return response.choices[0].message.content.strip()
+    except Exception as e:
+        st.error(f"Error analyzing detailed sentiment: {e}")
+        return "Detailed sentiment analysis failed."
+
+
+def analyze_emotional_sentiment(transcript, client):
+    """Emotional sentiment analysis focusing on specific emotions present."""
+    prompt = f"""
+    Analyze the emotional content of the following meeting transcript.
+    Identify the primary emotions present (such as joy, frustration, enthusiasm, concern, etc.)
+    and provide examples from the transcript that demonstrate these emotions.
+    
+    Also note any emotional patterns between different speakers if multiple people are present.
+    
+    Format your response as a clear emotional analysis of the meeting.
+
+    Transcript:
+    {transcript}
+    """
+    try:
+        response = client.chat.completions.create(
+            model="llama3-70b-8192",
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.3
+        )
+        return response.choices[0].message.content.strip()
+    except Exception as e:
+        st.error(f"Error analyzing emotional sentiment: {e}")
+        return "Emotional sentiment analysis failed."
     
 def translate_to_language(text, target_language="English", client=None):
     """Use Groq API to translate text to the specified language."""

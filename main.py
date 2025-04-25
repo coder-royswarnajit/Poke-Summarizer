@@ -7,7 +7,7 @@ from datetime import datetime
 from external_apis import get_groq_client, MonadBlockchainClient
 from processing import extract_text_from_file, preprocess_audio
 from pdf_utils import create_summary_pdf, get_pdf_download_link
-from news_api import get_news_client, fetch_related_news, fetch_latest_news, render_news_column
+from news_api import get_news_client, fetch_related_news, fetch_latest_news
 from transcription_and_summarization import (
     transcribe_with_transformers_whisper,
     translate_to_english,
@@ -18,6 +18,18 @@ from transcription_and_summarization import (
     analyze_sentiment,
 )  # Import all functions
 
+# Import our custom styling
+from custom import (
+    apply_custom_css, 
+    render_logo, 
+    render_card, 
+    render_custom_footer,
+    render_summary_box,
+    render_sentiment_box,
+    render_news_card,
+    render_pro_feature_banner
+)
+
 # Initialize session state for whisper model size if not already set
 if 'whisper_model_size' not in st.session_state:
     st.session_state.whisper_model_size = "base"
@@ -25,6 +37,10 @@ if 'whisper_model_size' not in st.session_state:
 # Initialize session state for summary language
 if 'summary_language' not in st.session_state:
     st.session_state.summary_language = "English"
+
+# Initialize session state for sentiment analysis approach
+if 'sentiment_analysis_approach' not in st.session_state:
+    st.session_state.sentiment_analysis_approach = "standard"
 
 # Initialize clients
 client = get_groq_client()
@@ -37,10 +53,36 @@ except Exception as e:
     st.warning(f"Failed to initialize Monad blockchain client: {e}")
     monad_client = None
 
+def render_news_column(articles):
+    """Render news articles in a Streamlit container with professional styling"""
+    if not articles:
+        st.info("No news articles available")
+        return
+    
+    # Create a grid layout for news articles
+    cols = st.columns(min(3, len(articles)))
+    
+    for idx, article in enumerate(articles):
+        col_idx = idx % len(cols)
+        with cols[col_idx]:
+            st.markdown(render_news_card(article), unsafe_allow_html=True)
+                
+    # Display any remaining articles in a list format if more than fits in the grid
+    if len(articles) > 3:
+        st.markdown("### More Related Articles")
+        for idx, article in enumerate(articles[3:], 3):
+            with st.expander(f"{article['title']} ({article['source']})"):
+                st.markdown(render_news_card(article), unsafe_allow_html=True)
 
 def main():
+    # Apply custom CSS
+    apply_custom_css()
+    
     # Always render the authentication UI in the sidebar
     render_auth_ui()
+    
+    # Render logo in main area
+    render_logo()
     
     # Set page title in main area even when not authenticated
     st.header("AI Meeting Summarizer")
@@ -66,13 +108,37 @@ def main():
                     list(LANGUAGES.keys()),
                     index=0  # Default to English
                 )
+                
+                # Add sentiment analysis approach selection only for Pro users
+                st.session_state.sentiment_analysis_approach = st.selectbox(
+                    "Sentiment Analysis Type",
+                    ["standard", "detailed", "emotional"],
+                    index=0,  # Default to standard
+                    help="Choose between standard, detailed, or emotional sentiment analysis"
+                )
             else:
-                st.info("📌 Upgrade to Pro for multi-language summaries")
+                st.info("📌 Upgrade to Pro for multi-language summaries and advanced sentiment analysis")
                 # Default to English for non-Pro users
                 st.session_state.summary_language = "English"
+                # Default to standard sentiment analysis for non-Pro users
+                st.session_state.sentiment_analysis_approach = "standard"
         
         # Main content area (full width)
-        uploaded_file = st.file_uploader("Upload meeting notes, audio, or video", type=["txt", "pdf", "docx", "mp3", "wav", "mp4", "avi", "mov"])
+        with st.container():
+            upload_column, info_column = st.columns([2, 1])
+            
+            with upload_column:
+                st.markdown("### Upload Meeting Content")
+                uploaded_file = st.file_uploader("Upload meeting notes, audio, or video", type=["txt", "pdf", "docx", "mp3", "wav", "mp4", "avi", "mov"])
+            
+            with info_column:
+                st.markdown("### How It Works")
+                st.markdown("""
+                1. Upload your meeting file
+                2. Our AI will transcribe audio/video
+                3. Get your summary and sentiment analysis
+                4. See related news and insights
+                """)
 
         if uploaded_file:
             file_path_or_text = extract_text_from_file(uploaded_file)
@@ -101,27 +167,52 @@ def main():
             if text_to_summarize:
                 content_hash = hashlib.sha256(text_to_summarize.encode()).hexdigest()
 
+                # Display content processing in a card
+                st.markdown("### Content Analysis")
+                with st.container():
+                    processing_cols = st.columns(4)
+                    with processing_cols[0]:
+                        st.metric("File Size", f"{len(text_to_summarize)/1000:.1f} KB")
+                    with processing_cols[1]:
+                        st.metric("Word Count", f"{len(text_to_summarize.split())}")
+                    with processing_cols[2]:
+                        content_type = "Audio/Video" if uploaded_file.type.startswith(("audio/", "video/")) else "Document"
+                        st.metric("Content Type", content_type)
+                    with processing_cols[3]:
+                        st.metric("Processing", "Complete", delta="100%")
+
                 # Blockchain verification only for Pro users
                 if monad_client and st.session_state.is_pro:
                     try:
-                        # Track data provenance using Monad blockchain
-                        monad_success, tx_hash = monad_client.track_data_provenance(
-                            source="MeetingNotes", content_hash=content_hash
-                        )
-                        if monad_success:
-                            st.success(f"Data provenance tracked on Monad blockchain with transaction hash: {tx_hash}")
-                            st.info(f"View on Monad Explorer: {monad_client.explorer_url}/tx/{tx_hash}")
-
-                        # Verify credibility using Monad blockchain
-                        credibility_score, sources = monad_client.verify_credibility(content_hash)
-                        st.info(f"Content credibility score: {credibility_score}")
-                        if sources:
-                            st.info(f"Credibility verification sources: {sources}")
+                        st.markdown("### Blockchain Verification")
+                        
+                        # Create two columns for blockchain info
+                        blockchain_cols = st.columns(2)
+                        
+                        with blockchain_cols[0]:
+                            # Track data provenance using Monad blockchain
+                            monad_success, tx_hash = monad_client.track_data_provenance(
+                                source="MeetingNotes", content_hash=content_hash
+                            )
+                            if monad_success:
+                                st.success(f"Data provenance tracked successfully")
+                                st.code(f"{tx_hash[:20]}...{tx_hash[-8:]}", language="text")
+                                st.markdown(f"[View on Monad Explorer]({monad_client.explorer_url}/tx/{tx_hash})")
+                            
+                        with blockchain_cols[1]:
+                            # Verify credibility using Monad blockchain
+                            credibility_score, sources = monad_client.verify_credibility(content_hash)
+                            
+                            # Use a gauge-like visualization for credibility score
+                            st.markdown("#### Content Credibility")
+                            st.progress(credibility_score/100)
+                            st.metric("Score", f"{credibility_score}/100")
+                            
                     except Exception as e:
                         st.error(f"Error with Monad blockchain services: {e}")
                 elif not st.session_state.is_pro:
                     # Show upgrade banner for credibility scoring
-                    st.info("📌 Upgrade to Pro for content credibility verification")
+                    render_pro_feature_banner("Upgrade to Pro for content credibility verification")
 
                 # Summarization and Analysis
                 with st.spinner("Summarizing with AI..."):
@@ -143,14 +234,23 @@ def main():
                         sentiment = "Sentiment analysis unavailable. API client not initialized."
 
                 # Display the summary and sentiment
-                st.subheader("Summary")
-                st.info(summary)
+                st.markdown("### Summary")
+                render_summary_box(summary)
 
-                st.subheader("Sentiment Analysis")
-                st.info(sentiment)
+                # Display sentiment analysis with type label for Pro users
+                sentiment_type = st.session_state.sentiment_analysis_approach.capitalize()
+                st.markdown(f"### Sentiment Analysis")
+                
+                # For non-Pro users, show a hint that advanced sentiment is available
+                if not st.session_state.is_pro and sentiment_type == "Standard":
+                    render_sentiment_box(sentiment, "Standard")
+                    render_pro_feature_banner("Upgrade to Pro for detailed and emotional sentiment analysis")
+                else:
+                    render_sentiment_box(sentiment, sentiment_type)
 
                 # PDF download option only for Pro users
                 if st.session_state.is_pro:
+                    st.markdown("### Export Options")
                     # Create PDF download link with the improved function
                     with st.spinner("Generating PDF..."):
                         pdf_path = create_summary_pdf(summary, sentiment)
@@ -159,13 +259,15 @@ def main():
                         with open(pdf_path, "rb") as pdf_file:
                             pdf_bytes = pdf_file.read()
                         
-                        st.download_button(
-                            label="📄 Download Summary as PDF",
-                            data=pdf_bytes,
-                            file_name="meeting_summary.pdf",
-                            mime="application/pdf",
-                            key="pdf_download"
-                        )
+                        download_col1, download_col2 = st.columns([1, 3])
+                        with download_col1:
+                            st.download_button(
+                                label="📄 Download as PDF",
+                                data=pdf_bytes,
+                                file_name="meeting_summary.pdf",
+                                mime="application/pdf",
+                                key="pdf_download"
+                            )
                         
                         # Clean up the PDF file after offering download
                         try:
@@ -178,21 +280,22 @@ def main():
                         st.session_state.previous_pdf_path = pdf_path
                 else:
                     # Show upgrade banner for PDF download
-                    st.info("📌 Upgrade to Pro to download summaries as PDF")
+                    render_pro_feature_banner("Upgrade to Pro to download summaries as PDF")
                 
                 # Fetch and display related news AFTER summary is created
                 if news_api_key and client:
-                    with st.spinner("Fetching related news..."):
+                    with st.spinner("Fetching latest news..."):
                         # Use summary_english for related news search (better keywords)
                         related_news = fetch_related_news(summary_english, news_api_key)
                         st.session_state.news_articles = related_news
                     
+                                        
                     # Show related news after summary
-                    st.subheader("📰 Related News")
+                    st.subheader("📰 Latest News")
                     if related_news:
                         render_news_column(related_news)
                     else:
-                        st.info("No related news found. Showing latest technology news instead.")
+                        st.info("No latest news found. Showing latest technology news instead.")
                         latest_news = fetch_latest_news(news_api_key, category="technology")
                         render_news_column(latest_news)
                 
@@ -224,6 +327,7 @@ def main():
         - Download summaries as PDF
         - Translate summaries to 20+ languages
         - Content credibility verification with blockchain
+        - Advanced sentiment analysis options
         
         Sign in with the demo account or create your own to get started!
         """)
