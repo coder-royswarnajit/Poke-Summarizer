@@ -368,7 +368,7 @@ def main():
             with col2:
                 st.markdown("""
                 <div style="border: 1px solid #2196F3; border-radius: 10px; padding: 20px; background-color: rgba(33, 150, 243, 0.05); height: 100%;">
-                    <h2 style="color: #2196F3; text-align: center;">Pro Features</h2>
+                    <h2 style="color: #000000; text-align: center;">Pro Features</h2>
                     <ul style="list-style-type: none; padding-left: 10px;">
                         <li style="margin-bottom: 10px;">⭐ <b>Download summaries as PDF</b> for easy sharing</li>
                         <li style="margin-bottom: 10px;">⭐ <b>Translate summaries to 20+ languages</b> for global teams</li>
