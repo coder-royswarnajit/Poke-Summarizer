@@ -444,7 +444,7 @@ def render_news_card(article):
         image_html = f'<img src="{image_url}" alt="{article["title"]}" style="width:100%; height:180px; object-fit:cover; border-radius:0.25rem; margin-bottom:0.75rem;">'
     else:
         # Use placeholder if no image available
-        image_html = '<img src="/api/placeholder/400/180" alt="placeholder" style="width:100%; height:180px; object-fit:cover; border-radius:0.25rem; margin-bottom:0.75rem;">'
+        image_html = '<img src="https://via.placeholder.com/400x320" alt="placeholder" />'
         
     return f"""
     <div class="news-card">
