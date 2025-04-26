@@ -150,7 +150,7 @@ def apply_custom_css():
             border-radius: 0.375rem;
             padding: 1rem;
             margin-bottom: 1rem;
-            background-color: white;
+            background-color: #003153;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
         }
         

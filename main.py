@@ -336,26 +336,49 @@ def main():
             else:
                 st.info("News API key not configured. Please add it to the .env file to see news.")
     else:
-        # Show welcome message when not authenticated
-        st.info("👋 Welcome to Poke Summarizer! Please sign in to continue.")
-        st.markdown("""
-        ### Features:
-        - Automatically transcribe audio and video meetings
-        - Generate concise summaries of meeting content
-        - Extract action items and deadlines
-        - Analyze sentiment and key discussion points
-        - See news related to your meeting topics
-        - Toggle between light and dark mode for comfortable viewing
         
-        ### Pro Features:
-        - Download summaries as PDF
-        - Translate summaries to 20+ languages
-        - Content credibility verification with blockchain
-        - Advanced sentiment analysis options
-        
-        Sign in with the demo account or create your own to get started!
-        """)
+       
 
+        def display_features_cards():
+            # Create two columns for the feature cards
+            col1, col2 = st.columns(2, gap="large")
+            
+            with col1:
+                st.markdown("""
+                <div style="border: 1px solid #4CAF50; border-radius: 10px; padding: 20px; height: 100%;">
+                    <h2 style="color: #4CAF50; text-align: center;">Basic Features</h2>
+                    <ul style="list-style-type: none; padding-left: 10px;">
+                        <li style="margin-bottom: 10px;">✅ <b>Transcribe audio & video</b> meetings automatically</li>
+                        <li style="margin-bottom: 10px;">✅ <b>Generate concise summaries</b> of meeting content</li>
+                        <li style="margin-bottom: 10px;">✅ <b>Extract action items</b> and deadlines</li>
+                        <li style="margin-bottom: 10px;">✅ <b>Analyze sentiment</b> and key discussion points</li>
+                        <li style="margin-bottom: 10px;">✅ <b>See news</b> related to your meeting topics</li>
+                        <li style="margin-bottom: 10px;">✅ <b>Toggle between light and dark</b> mode for comfortable viewing</li>
+                    </ul>
+                </div>
+                """, unsafe_allow_html=True)
+            
+            with col2:
+                st.markdown("""
+                <div style="border: 1px solid #2196F3; border-radius: 10px; padding: 20px; background-color: rgba(33, 150, 243, 0.05); height: 100%;">
+                    <h2 style="color: #2196F3; text-align: center;">Pro Features</h2>
+                    <ul style="list-style-type: none; padding-left: 10px;">
+                        <li style="margin-bottom: 10px;">⭐ <b>Download summaries as PDF</b> for easy sharing</li>
+                        <li style="margin-bottom: 10px;">⭐ <b>Translate summaries to 20+ languages</b> for global teams</li>
+                        <li style="margin-bottom: 10px;">⭐ <b>Content credibility verification</b> with blockchain</li>
+                        <li style="margin-bottom: 10px;">⭐ <b>Advanced sentiment analysis</b> options</li>
+                    </ul>
+                    
+                </div>
+                """, unsafe_allow_html=True)
+
+        # Add this function call in the main content area of main() when not authenticated
+        if not st.session_state.user_authenticated:
+            st.info("👋 Welcome to Poke Summarizer! Please sign in to continue.")
+            
+            # Display feature cards
+            display_features_cards()
+                                   
         # Dark mode toggle still available for unauthenticated users
         with st.sidebar:
             st.markdown("### Try Dark Mode")

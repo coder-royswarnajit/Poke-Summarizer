@@ -143,6 +143,16 @@ def render_news_column(articles):
         st.info("No news articles available")
         return
     
+    # Add custom CSS to ensure text visibility
+    st.markdown("""
+    <style>
+        .news-title { color: #1E1E1E; font-weight: bold; font-size: 1.2rem; margin-bottom: 0.5rem; }
+        .news-source { color: #5A5A5A; font-size: 0.8rem; }
+        .news-description { color: #333333; margin: 0.7rem 0; }
+        .news-link { color: #1E88E5; text-decoration: underline; }
+    </style>
+    """, unsafe_allow_html=True)
+    
     # Create a grid layout for news articles
     cols = st.columns(min(3, len(articles)))
     
@@ -150,10 +160,13 @@ def render_news_column(articles):
         col_idx = idx % len(cols)
         with cols[col_idx]:
             with st.container():
-                st.markdown(f"#### {article['title']}")
-                st.caption(f"{article['source']} • {format_date(article['publishedAt'])}")
-                st.write(article["description"])
-                st.markdown(f"[Read more]({article['url']})")
+                # Use HTML/CSS to control text colors
+                st.markdown(f"""
+                <div class="news-title">{article['title']}</div>
+                <div class="news-source">{article['source']} • {format_date(article['publishedAt'])}</div>
+                <div class="news-description">{article['description']}</div>
+                <a href="{article['url']}" target="_blank" class="news-link">Read more</a>
+                """, unsafe_allow_html=True)
                 st.divider()
                 
     # Display any remaining articles in a list format if more than fits in the grid
@@ -161,10 +174,13 @@ def render_news_column(articles):
         st.markdown("### More Related Articles")
         for idx, article in enumerate(articles[3:], 3):
             with st.expander(f"{article['title']} ({article['source']})"):
-                st.caption(f"{format_date(article['publishedAt'])}")
-                st.write(article["description"])
-                st.markdown(f"[Read more]({article['url']})")
-
+                # Use HTML/CSS to control text colors in expanders too
+                st.markdown(f"""
+                <div class="news-source">{format_date(article['publishedAt'])}</div>
+                <div class="news-description">{article['description']}</div>
+                <a href="{article['url']}" target="_blank" class="news-link">Read more</a>
+                """, unsafe_allow_html=True)
+                               
 def format_date(date_str):
     """Format date string to a more readable format"""
     try:
