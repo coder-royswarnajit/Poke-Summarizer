@@ -178,7 +178,7 @@ def apply_custom_css():
         
         /* Pro features badge */
         .pro-badge {
-            background-color: #FEF3C7;
+            background-color: #F0F7FF;
             color: #2D3748;
             padding: 0.25rem 0.5rem;
             border-radius: 9999px;
