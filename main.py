@@ -46,6 +46,13 @@ if 'summary_language' not in st.session_state:
 # Initialize session state for sentiment analysis approach
 if 'sentiment_analysis_approach' not in st.session_state:
     st.session_state.sentiment_analysis_approach = "standard"
+    
+# Initialize session state for authentication
+if 'user_authenticated' not in st.session_state:
+    st.session_state.user_authenticated = False
+
+if 'is_pro' not in st.session_state:
+    st.session_state.is_pro = False
 
 # Initialize clients
 client = get_groq_client()
