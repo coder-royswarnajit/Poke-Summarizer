@@ -2,10 +2,9 @@ import streamlit as st
 
 def apply_custom_css():
     """Apply custom CSS to override Streamlit defaults and create a professional look"""
-    # Check if dark mode is enabled in session state
+    
     is_dark_mode = st.session_state.get('dark_mode', False)
     
-    # Base CSS that applies to both light and dark modes
     base_css = """
     <style>
         /* Main layout styling */
