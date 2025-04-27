@@ -74,7 +74,7 @@ Poke Summarizer tackles information overload from documents, videos, and audios 
 
 ## 📽️ Demo & Deliverables
 
-- **Demo Video Link:** [Add your demo link]  
+- **Demo Video Link:** https://youtu.be/5qPFVjhN0_w
 - **Repository Link:** https://github.com/coder-royswarnajit/Poke-Summarizer.git
 - **PPT Link:** https://www.canva.com/design/DAGlkNVG-R4/HABihp-8s7IojXYhZdVJgg/edit?utm_content=DAGlkNVG-R4&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton
 - **Deployment Link:** https://poke-summarizer.streamlit.app/
@@ -128,7 +128,8 @@ MONAD_EXPLORER_URL=your_monad_explorer_url
 
 ### Short-term (1-3 months):
 - Optimize mobile responsiveness
-- Expand to 10+ more languages
+- Expand to 10+ more languages, especially Indian regional languages
+- News API key update, so that it work in deployment purposes and not just for develpoers purposes
 - News categorization improvements
 - Launch public API access
 - Allow customizations (summary tone, length)
