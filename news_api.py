@@ -38,7 +38,7 @@ def extract_keywords(text, max_keywords=5):
     # Return top keywords
     return [word for word, _ in sorted_words[:max_keywords]]
 
-def fetch_related_news(summary, api_key, max_results=5):
+def fetch_related_news(summary, api_key, max_results=6):
     """Fetch news related to Meetings and News summary content"""
     if not api_key or not summary:
         return []
@@ -94,7 +94,7 @@ def fetch_related_news(summary, api_key, max_results=5):
         st.error(f"Error fetching related news: {e}")
         return []
 
-def fetch_latest_news(api_key, category="general", max_results=5):
+def fetch_latest_news(api_key, category="general", max_results=6):
     """Fetch the latest news in a specific category"""
     if not api_key:
         return []
