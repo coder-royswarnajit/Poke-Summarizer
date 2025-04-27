@@ -226,7 +226,7 @@ def main():
                 1. Upload your Meetings and News file
                 2. Our AI will transcribe audio/video
                 3. Get your summary and sentiment analysis
-                4. See related news and insights
+                4. See latest news and insights
                 """)
         if uploaded_file:
             file_path_or_text = extract_text_from_file(uploaded_file)
@@ -430,7 +430,7 @@ def main():
                         <li style="margin-bottom: 10px;">✅ <b>Generate concise summaries</b> of Meetings and News content</li>
                         <li style="margin-bottom: 10px;">✅ <b>Extract action items</b> and deadlines</li>
                         <li style="margin-bottom: 10px;">✅ <b>Analyze sentiment</b> and key discussion points</li>
-                        <li style="margin-bottom: 10px;">✅ <b>See news</b> related to your Meetings and News topics</li>
+                        <li style="margin-bottom: 10px;">✅ <b>See latest news</b>topics</li>
                         <li style="margin-bottom: 10px;">✅ <b>Toggle between light and dark</b> mode for comfortable viewing</li>
                     </ul>
                 </div>
