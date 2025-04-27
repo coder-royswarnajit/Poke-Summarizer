@@ -74,7 +74,7 @@ Poke Summarizer tackles information overload from documents, videos, and audios 
 
 ## 📽️ Demo & Deliverables
 
-- **Demo Video Link:** https://youtu.be/5qPFVjhN0_w
+- **Demo Video Link:** https://youtu.be/NPhF7qSmUUc?si=SKXlQTguRFvRm7n_
 - **Repository Link:** https://github.com/coder-royswarnajit/Poke-Summarizer.git
 - **PPT Link:** https://www.canva.com/design/DAGlkNVG-R4/HABihp-8s7IojXYhZdVJgg/edit?utm_content=DAGlkNVG-R4&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton
 - **Deployment Link:** https://poke-summarizer.streamlit.app/
