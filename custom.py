@@ -403,7 +403,7 @@ def render_custom_footer():
     """Render a custom professional footer"""
     footer_html = """
     <div class="custom-footer">
-        Poke Summarizer © 2025 | AI-powered Meeting Transcription and Summarization Tool
+        Poke Summarizer © 2025 | AI-powered Meetings and News Transcription and Summarization Tool
     </div>
     """
     st.markdown(footer_html, unsafe_allow_html=True)

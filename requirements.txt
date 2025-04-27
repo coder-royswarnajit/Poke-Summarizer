@@ -1,5 +1,6 @@
 streamlit
 groq
+web3
 PyPDF2
 python-docx
 moviepy
