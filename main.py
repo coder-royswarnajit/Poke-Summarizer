@@ -1,6 +1,9 @@
 import streamlit as st
 import os
 import hashlib
+from image_utils import get_placeholder_image
+from wallet_integration import BaseWalletSDK
+from base_integration import render_base_blockchain_info, render_payment_form
 from config import LANGUAGES, GROQ_API_KEY  # Import constants
 from user_auth import render_auth_ui, render_user_profile
 from datetime import datetime
@@ -109,7 +112,75 @@ def main():
     if st.session_state.user_authenticated:
         # Render user profile in sidebar
         render_user_profile()
-    
+    if st.session_state.user_authenticated:
+        with st.sidebar:
+            st.markdown("---")
+            st.subheader("Wallet Integration")
+            
+            if st.session_state.get('user_wallet'):
+                wallet = st.session_state.user_wallet
+                st.markdown(f"**Balance:** {wallet.get('balance', 0):.4f} ETH")
+                st.markdown(f"**Network:** Base")
+                
+                # Show a link to view wallet details
+                if st.button("View Wallet Details"):
+                    st.session_state.show_wallet_details = True
+            else:
+                st.warning("No wallet connected")
+        
+        # Show wallet details if requested
+        if st.session_state.get('show_wallet_details', False):
+            with st.expander("Wallet Details", expanded=True):
+                wallet_tabs = st.tabs(["Balance", "Send", "Receive", "History"])
+                
+                with wallet_tabs[0]:
+                    wallet = st.session_state.user_wallet
+                    st.metric("ETH Balance", f"{wallet.get('balance', 0):.4f} ETH")
+                    st.text(f"Wallet Address: {wallet.get('address')}")
+                    
+                    if st.button("🔄 Refresh Balance"):
+                        # Update wallet balance
+                        wallet_sdk = BaseWalletSDK()
+                        new_balance = wallet_sdk.get_wallet_balance(wallet.get('address'))
+                        st.session_state.user_wallet['balance'] = new_balance
+                        st.success("Balance updated!")
+                        st.rerun()
+                
+                with wallet_tabs[1]:
+                    render_payment_form()
+                
+                with wallet_tabs[2]:
+                    st.subheader("Receive ETH")
+                    st.markdown("Share your wallet address to receive ETH payments:")
+                    st.code(wallet.get('address'), language="text")
+                    st.markdown("Scan the QR code below:")
+                    # Generate QR code placeholder
+                    st.image(get_placeholder_image(150, 150), width=150)
+                
+                with wallet_tabs[3]:
+                    st.subheader("Transaction History")
+                    transactions = st.session_state.users[st.session_state.user_id].get("transactions", [])
+                    if transactions:
+                        for tx in transactions:
+                            st.markdown(f"""
+                            **Hash**: `{tx['hash'][:10]}...{tx['hash'][-6:]}`  
+                            **Amount**: {tx['amount']} {tx['currency']}  
+                            **Date**: {tx['timestamp'].split('T')[0]}  
+                            **Status**: {tx['status']}
+                            ---
+                            """)
+                    else:
+                        st.info("No transaction history yet")
+        
+        # Create a blockchain information section
+        if st.session_state.get('show_blockchain_info', False):
+            render_base_blockchain_info()
+        
+        # Add a link to toggle blockchain info display
+        with st.sidebar:
+            if st.button("About Base Blockchain" if not st.session_state.get('show_blockchain_info', False) else "Hide Blockchain Info"):
+                st.session_state.show_blockchain_info = not st.session_state.get('show_blockchain_info', False)
+                st.rerun()
         # Add settings in sidebar
         with st.sidebar:
             st.subheader("Settings")
