@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Streamlit page configuration
-st.set_page_config(page_title="AI Meeting Summarizer", layout="wide", page_icon="📝")
+st.set_page_config(page_title="AI Meetings and News Summarizer", layout="wide", page_icon="📝")
 
 # Environment variables
 GROQ_API_KEY = os.environ.get("GROQ_API_KEY", "YOUR_GROQ_API_KEY")  # Replace with your API key
@@ -26,13 +26,6 @@ LANGUAGES = {
     "German": "German (Deutsch)",
     "Italian": "Italian (Italiano)",
     "Portuguese": "Portuguese (Português)",
-    "Chinese": "Chinese (中文)",
-    "Japanese": "Japanese (日本語)",
-    "Korean": "Korean (한국어)",
-    "Russian": "Russian (Русский)",
-    "Arabic": "Arabic (العربية)",
-    "Hindi": "Hindi (हिन्दी)",
-    "Bengali": "Bengali (বাংলা)",
     "Turkish": "Turkish (Türkçe)",
     "Vietnamese": "Vietnamese (Tiếng Việt)",
     "Thai": "Thai (ภาษาไทย)",

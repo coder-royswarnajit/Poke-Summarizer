@@ -15,7 +15,7 @@
 
 ## 🎯 Objective
 
-Poke Summarizer tackles information overload from documents, videos, and audios by providing concise, real-time, and credible summaries across languages. It serves individuals and teams needing fast, verifiable insights from meetings and media content.
+Poke Summarizer tackles information overload from documents, videos, and audios by providing concise, real-time, and credible summaries across languages. It serves individuals and teams needing fast, verifiable insights from Meetings and Newss and media content.
 
 ---
 

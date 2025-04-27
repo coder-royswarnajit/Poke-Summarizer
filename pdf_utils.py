@@ -10,7 +10,7 @@ class SummaryPDF(FPDF):
     def header(self):
         # Set up header with logo and title
         self.set_font('Arial', 'B', 15)
-        self.cell(0, 10, 'Poke Summarizer - Meeting Summary', 0, 1, 'C')
+        self.cell(0, 10, 'Poke Summarizer - Meetings and News Summary', 0, 1, 'C')
         self.ln(5)
         
     def footer(self):
@@ -21,7 +21,7 @@ class SummaryPDF(FPDF):
         self.cell(0, 10, f'Generated on {datetime.now().strftime("%Y-%m-%d %H:%M")}', 0, 0, 'R')
 
 def create_summary_pdf(summary, sentiment):
-    """Create a PDF with the meeting summary and analysis"""
+    """Create a PDF with the Meetings and News summary and analysis"""
     # Create a Unicode-compatible PDF
     pdf = SummaryPDF()
     # Add a font that supports various languages
@@ -72,7 +72,7 @@ def create_summary_pdf(summary, sentiment):
     
     return temp_file_path
 
-def get_pdf_download_link(pdf_path, filename="meeting_summary.pdf"):
+def get_pdf_download_link(pdf_path, filename="Meetings and News_summary.pdf"):
     """Generate a download link for the PDF file
     
     Note: This function is kept for backwards compatibility, but we recommend using

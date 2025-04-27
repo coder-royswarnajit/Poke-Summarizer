@@ -39,7 +39,7 @@ def extract_keywords(text, max_keywords=5):
     return [word for word, _ in sorted_words[:max_keywords]]
 
 def fetch_related_news(summary, api_key, max_results=5):
-    """Fetch news related to meeting summary content"""
+    """Fetch news related to Meetings and News summary content"""
     if not api_key or not summary:
         return []
     

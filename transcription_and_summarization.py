@@ -135,7 +135,7 @@ def improve_transcript_quality(transcript):
         return transcript
 
     prompt = f"""
-    You are an expert transcriptionist. Improve the following meeting transcript by:
+    You are an expert transcriptionist. Improve the following Meetings and News transcript by:
     1. Fixing spelling and grammar errors
     2. Adding proper punctuation and capitalization
     3. Separating speakers clearly if multiple speakers are present
@@ -163,7 +163,7 @@ def improve_transcript_quality(transcript):
         return transcript  # Return original transcript if improvement fails
 
 def summarize_text_groq(transcript, client, target_language="English"):
-    """Use Groq API to summarize the meeting transcript."""
+    """Use Groq API to summarize the Meetings and News transcript."""
     if not transcript or len(transcript.strip()) < 50:
         return "The transcript is too short to summarize."
     
@@ -171,7 +171,7 @@ def summarize_text_groq(transcript, client, target_language="English"):
         return "Summary unavailable. API client not initialized."
 
     prompt = f"""
-    Summarize the following meeting transcript in a concise and informative way.
+    Summarize the following Meetings and News transcript in a concise and informative way.
     Highlight the key discussion points, decisions made, and important takeaways.
 
     IMPORTANT: Your summary must be written in {target_language} language.
@@ -215,7 +215,7 @@ def analyze_sentiment(transcript, client):
 def analyze_standard_sentiment(transcript, client):
     """Standard sentiment analysis providing basic positive/negative/neutral classification."""
     prompt = f"""
-    Analyze the overall sentiment of the following meeting transcript.
+    Analyze the overall sentiment of the following Meetings and News transcript.
     Return the sentiment as one of the following: "Positive", "Negative", or "Neutral".
 
     Transcript:
@@ -236,12 +236,12 @@ def analyze_standard_sentiment(transcript, client):
 def analyze_detailed_sentiment(transcript, client):
     """Advanced sentiment analysis with confidence scores and reasoning."""
     prompt = f"""
-    Perform an advanced sentiment analysis of the following meeting transcript.
+    Perform an advanced sentiment analysis of the following Meetings and News transcript.
     Provide:
     1. Overall sentiment classification (Positive, Negative, or Neutral)
     2. Confidence score (1-10)
     3. Brief explanation of key factors influencing the sentiment
-    4. Any shifts in sentiment throughout the meeting
+    4. Any shifts in sentiment throughout the Meetings and News
     5. Most emotionally charged topics or moments
 
     Format your response as a structured analysis with these sections.
@@ -264,13 +264,13 @@ def analyze_detailed_sentiment(transcript, client):
 def analyze_emotional_sentiment(transcript, client):
     """Emotional sentiment analysis focusing on specific emotions present."""
     prompt = f"""
-    Analyze the emotional content of the following meeting transcript.
+    Analyze the emotional content of the following Meetings and News transcript.
     Identify the primary emotions present (such as joy, frustration, enthusiasm, concern, etc.)
     and provide examples from the transcript that demonstrate these emotions.
     
     Also note any emotional patterns between different speakers if multiple people are present.
     
-    Format your response as a clear emotional analysis of the meeting.
+    Format your response as a clear emotional analysis of the Meetings and News.
 
     Transcript:
     {transcript}

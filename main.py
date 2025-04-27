@@ -106,7 +106,7 @@ def main():
     render_logo()
     
     # Set page title in main area even when not authenticated
-    st.header("AI Meeting Summarizer")
+    st.header("AI Meetings and News Summarizer")
     
     # Only show main content if authenticated
     if st.session_state.user_authenticated:
@@ -217,13 +217,13 @@ def main():
             upload_column, info_column = st.columns([2, 1])
             
             with upload_column:
-                st.markdown("### Upload Meeting Content")
-                uploaded_file = st.file_uploader("Upload meeting notes, audio, or video", type=["txt", "pdf", "docx", "mp3", "wav", "mp4", "avi", "mov"])
+                st.markdown("### Upload Meetings and News Content")
+                uploaded_file = st.file_uploader("Upload Meetings and News notes, audio, or video", type=["txt", "pdf", "docx", "mp3", "wav", "mp4", "avi", "mov"])
             
             with info_column:
                 st.markdown("### How It Works")
                 st.markdown("""
-                1. Upload your meeting file
+                1. Upload your Meetings and News file
                 2. Our AI will transcribe audio/video
                 3. Get your summary and sentiment analysis
                 4. See related news and insights
@@ -293,7 +293,7 @@ def main():
                         with blockchain_cols[0]:
                             # Track data provenance using Monad blockchain
                             monad_success, tx_hash = monad_client.track_data_provenance(
-                                source="MeetingNotes", content_hash=content_hash
+                                source="Meetings and NewsNotes", content_hash=content_hash
                             )
                             if monad_success:
                                 st.success(f"Data provenance tracked successfully")
@@ -365,7 +365,7 @@ def main():
                             st.download_button(
                                 label="📄 Download as PDF",
                                 data=pdf_bytes,
-                                file_name="meeting_summary.pdf",
+                                file_name="Meetings and News_summary.pdf",
                                 mime="application/pdf",
                                 key="pdf_download"
                             )
@@ -426,11 +426,11 @@ def main():
                 <div style="border: 1px solid #4CAF50; border-radius: 10px; padding: 20px; height: 100%;">
                     <h2 style="color: #4CAF50; text-align: center;">Basic Features</h2>
                     <ul style="list-style-type: none; padding-left: 10px;">
-                        <li style="margin-bottom: 10px;">✅ <b>Transcribe audio & video</b> meetings automatically</li>
-                        <li style="margin-bottom: 10px;">✅ <b>Generate concise summaries</b> of meeting content</li>
+                        <li style="margin-bottom: 10px;">✅ <b>Transcribe audio & video</b> Meetings and Newss automatically</li>
+                        <li style="margin-bottom: 10px;">✅ <b>Generate concise summaries</b> of Meetings and News content</li>
                         <li style="margin-bottom: 10px;">✅ <b>Extract action items</b> and deadlines</li>
                         <li style="margin-bottom: 10px;">✅ <b>Analyze sentiment</b> and key discussion points</li>
-                        <li style="margin-bottom: 10px;">✅ <b>See news</b> related to your meeting topics</li>
+                        <li style="margin-bottom: 10px;">✅ <b>See news</b> related to your Meetings and News topics</li>
                         <li style="margin-bottom: 10px;">✅ <b>Toggle between light and dark</b> mode for comfortable viewing</li>
                     </ul>
                 </div>
